@@ -1,0 +1,21 @@
+###########################################
+##### Example RF Switch configuration #####
+###########################################
+
+switch switch01:
+  platform: rpi_rf
+  gpio: 17
+  switches:
+    switch01:
+      code_on: YOUR_ON_CODE_HERE
+      code_off: YOUR_OFF_CODE_HERE
+
+
+switch coffeemachine:
+  platform: rpi_rf
+  gpio: 17
+  switches:
+    coffeemachine:
+      code_on: YOUR_ON_CODE_HERE
+      code_off: YOUR_OFF_CODE_HERE
+      
