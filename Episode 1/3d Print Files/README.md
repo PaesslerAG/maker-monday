@@ -9,7 +9,7 @@ If you want to use the GPIO Pins this case may not fit your needs! If you wan't 
 
 I've printed with PETG to get a bit more flex and a  easy snap in case. PLA should work too. 
 
-My Settiungs:
+My Settings:
 
 **Resolution:** 0.2 mm
 **Infill:** 20%
