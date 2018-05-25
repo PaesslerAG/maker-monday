@@ -8,3 +8,4 @@ Youtube: https://www.youtube.com/playlist?list=PLlzpc0FQ9agg4q1gejCJbGzNMY43F2TV
 
 - Episode 1: Install HomeAssistant and Mosquitto
 - Episode 2: 433 Mhz Sockets
+- Episode 3: Wakeup Light

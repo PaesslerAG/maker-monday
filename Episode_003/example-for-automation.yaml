@@ -1,0 +1,13 @@
+- action:
+  - data:
+      effect: solid
+      brightness: '255'
+      entity_id: light.wakeuplight
+      transition: '900'
+    service: light.turn_on
+  alias: wakeupat8
+  condition: []
+  id: '1526630238474'
+  trigger:
+  - at: 08:00:00
+    platform: time
