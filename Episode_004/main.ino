@@ -1,4 +1,4 @@
-#include <Adafruit_BME280.h> //gepatchte version!   https://github.com/Takatsuki0204/BME280-I2C-ESP32
+#include <Adafruit_BME280.h> //patched version!   https://github.com/Takatsuki0204/BME280-I2C-ESP32
 #include <Wire.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -12,20 +12,20 @@ const char* ssid = "ssid";                          //replace this with your WiF
 const char* password = "wifipassword";      //replace this with your WiFi network password
 
 //define pins and address for BME
-#define SDA_PIN 27
-#define SCL_PIN 25
-#define BME280_ADDRESS 0x76
+#define SDA_PIN 27                    // define your SDA PIN
+#define SCL_PIN 25                    // define your SCL Pin
+#define BME280_ADDRESS 0x76           // define your BME Address, normaly 0x76 or 0x77
 
 // deepsleep factor
 #define uS_TO_S_FACTOR 1000000        // Conversion factor for micro seconds to seconds //
 #define TIME_TO_SLEEP 600             // Time ESP32 will go to sleep (in seconds) //
 
 // the MQTT stuff
-const char* mqtt_server = "hassbian";
-const char* mqtt_username = "username";
-const char* mqtt_password = "password";
-const char* clientID = "blclimate";
-const char* cSensorName = "office/temperature";
+const char* mqtt_server = "hassbian";     // replace this with your mqtt server
+const char* mqtt_username = "username";   // replace this with your mqtt user
+const char* mqtt_password = "password";   // replace this with your mqtt password
+const char* clientID = "blclimate";       // define your clientID
+const char* cSensorName = "office/temperature";  // define your mqtt topic /data will be added for messages!
 char msg[100];
 
 // define the clients
@@ -71,7 +71,7 @@ void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    if (client.connect(clientID)) {
+    if (client.connect(clientID, mqtt_username, mqtt_password)) {
       Serial.println("connected");
     } else {
       Serial.print("failed, rc=");
@@ -93,7 +93,7 @@ void setup() {
   //setup mqtt
   client.setServer(mqtt_server, 1883);
 
-  // starte BME280
+  // start BME280
   if (!bme.begin(BME280_ADDRESS)) {
     Serial.println("sensor failed!");
   }
