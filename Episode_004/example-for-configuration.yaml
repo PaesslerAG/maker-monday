@@ -1,0 +1,27 @@
+sensor office_temperature:
+  platform: mqtt
+  name: "office_temperature"
+  state_topic: "office/climate/data"
+  unit_of_measurement: "°C"
+  value_template: "{{value_json.temperature}}"
+
+sensor office_humidity:
+  platform: mqtt
+  name: "office_humidity"
+  state_topic: "office/climate/data"
+  unit_of_measurement: "%"
+  value_template: "{{value_json.humidity}}"
+
+sensor office_pressure:
+  platform: mqtt
+  name: "office_pressure"
+  state_topic: "office/climate/data"
+  unit_of_measurement: "hpa"
+  value_template: "{{value_json.pressure}}"
+
+sensor office_voltage:
+  platform: mqtt
+  name: "office_voltage"
+  state_topic: "office/climate/data"
+  unit_of_measurement: "mV"
+  value_template: "{{value_json.voltage}}"
