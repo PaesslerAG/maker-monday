@@ -25,7 +25,7 @@ const char* mqtt_server = "hassbian";     // replace this with your mqtt server
 const char* mqtt_username = "username";   // replace this with your mqtt user
 const char* mqtt_password = "password";   // replace this with your mqtt password
 const char* clientID = "blclimate";       // define your clientID
-const char* cSensorName = "office/temperature";  // define your mqtt topic /data will be added for messages!
+const char* cSensorName = "office/climate";  // define your mqtt topic /data will be added for messages!
 char msg[100];
 
 // define the clients
