@@ -1,0 +1,21 @@
+- alias: Notify PRTG, Mail arrived
+  trigger:
+  - entity_id: binary_sensor.mailbox_sensor
+    from: 'off'
+    platform: state
+    to: 'on'
+  action:
+    service: rest_command.prtg
+    data:
+      status: 1
+- alias: Notify PRTG, Mailbox emptied
+  trigger:
+  - entity_id: binary_sensor.mailbox_sensor
+    from: 'on'
+    platform: state
+    to: 'off'
+  action:
+    service: rest_command.prtg
+    data:
+      status: 0
+

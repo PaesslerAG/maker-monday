@@ -1,0 +1,7 @@
+  floor:
+    view: yes
+    icon: mdi:floor-plan
+    name: Floor
+    entities:
+      - binary_sensor.mailbox_sensor
+

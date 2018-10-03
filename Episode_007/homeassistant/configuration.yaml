@@ -1,0 +1,16 @@
+binary_sensor:
+  - platform: mqtt
+    name: "Mailbox Sensor"
+    state_topic: "mailbox/action"
+    payload_on: "arrived"
+    payload_off: "emptied"
+
+rest_command:
+  prtg:
+    url: http://put.your.prtg.ip.here:5050/TOK3M-G03S-H3R3-Y0-MAN
+    method: POST
+    headers:
+      accept: 'application/json, text/html'
+    payload: '{"prtg":{"result":[{"channel":"Mailbox","value":"{{ status }}"}]}}'
+    content_type:  'application/json; charset=utf-8'
+
