@@ -1,0 +1,7 @@
+#Sensors
+binary_sensor:
+	- platform: rpi_gpio
+	ports:
+		10: yavin
+		9: endor
+	bouncetime: 5

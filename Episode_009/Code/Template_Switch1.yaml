@@ -1,0 +1,27 @@
+switch template:
+	- platform: template
+	switches:
+		light1:
+			friendly_name: Yavin
+			value_template: "{{ is_state('binary_sensor.yavin', 'on') }}"
+			turn_on:
+				service: switch.toggle
+				data:
+					entity_id: switch.relay4
+			turn_off:
+				service: switch.toggle
+				data:
+					entity_id: switch.relay4
+	- platform: template
+	switches:
+		light1:
+			friendly_name: Endor
+			value_template: "{{ is_state('binary_sensor.endor', 'on') }}"
+			turn_on:
+				service: switch.toggle
+				data:
+					entity_id: switch.relay2and3
+			turn_off:
+				service: switch.toggle
+				data:
+					entity_id: switch.relay2and3

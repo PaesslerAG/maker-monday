@@ -1,0 +1,6 @@
+switch relay:
+	- platform: rpi_gpio
+	ports:
+		27: relay1
+		22: relay2and3
+		23: relay4
