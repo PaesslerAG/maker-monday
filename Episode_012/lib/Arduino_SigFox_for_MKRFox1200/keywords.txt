@@ -1,0 +1,39 @@
+#######################################
+# Syntax Coloring Map For Energy Saving
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+SigFox	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+PAC	KEYWORD2
+ID	KEYWORD2
+send	KEYWORD2
+receive	KEYWORD2
+status	KEYWORD2
+setMode	KEYWORD2
+internalTemperature	KEYWORD2
+reset	KEYWORD2
+AtmVersion	KEYWORD2
+SigVersion	KEYWORD2
+statusCode	KEYWORD2
+debug	KEYWORD2
+noDebug	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+ATMEL	LITERAL1
+SIGFOX	LITERAL1
+SSM	LITERAL1
+TX	LITERAL1
+TXRX	LITERAL1
+US	LITERAL1
+EU	LITERAL1

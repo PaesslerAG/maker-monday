@@ -13,3 +13,4 @@ Youtube: https://www.youtube.com/playlist?list=PLlzpc0FQ9agg4q1gejCJbGzNMY43F2TV
 - Episode 7: Smart Maibox
 - Episode 9: Multi Way Switch
 - Episode 11: Connect Homeassistant with PRTG
+- Episode 12: Particulate Mater Monitoring

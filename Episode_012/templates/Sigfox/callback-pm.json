@@ -1,0 +1,39 @@
+"Type": DATA::UPLINK
+"Payload Config": state::uint:8:little-endian moduleTemperature::int:16:little-endian pm25::uint:16:little-endian pm10::uint:16:little-endian
+"Content Type": application/json
+
+{
+    "prtg": {
+       "text": "OK",
+       "result": [
+        {
+            "channel": "state",
+            "value": {customData#state}
+        
+        },
+        {
+            "channel": "moduleTemperature",
+            "value": {customData#moduleTemperature},
+            "float": "1",
+            "unit": "custom",
+            "customunit": "°C"
+        
+        },
+        {
+            "channel": "pm25",
+            "value": {customData#pm25},
+            "float": "1",
+            "unit": "custom",
+            "customunit": "µg/m³"
+        
+        },
+        {
+            "channel": "pm10",
+            "value": {customData#pm10},
+            "float": "1",
+            "unit": "custom",
+            "customunit": "µg/m³"
+        
+        }]
+    }   
+}
