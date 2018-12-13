@@ -1,0 +1,36 @@
+sensor office_temperature:
+  platform: mqtt
+  name: "office_temperature"
+  state_topic: "office/climate/data"
+  unit_of_measurement: "°C"
+  value_template: "{{value_json.temperature}}"
+
+sensor office_humidity:
+  platform: mqtt
+  name: "office_humidity"
+  state_topic: "office/climate/data"
+  unit_of_measurement: "%"
+  value_template: "{{value_json.humidity}}"
+
+sensor office_pressure:
+  platform: mqtt
+  name: "office_pressure"
+  state_topic: "office/climate/data"
+  unit_of_measurement: "hpa"
+  value_template: "{{value_json.pressure}}"
+
+sensor office_voltage:
+  platform: mqtt
+  name: "office_voltage"
+  state_topic: "office/climate/data"
+  unit_of_measurement: "mV"
+  value_template: "{{value_json.voltage}}"
+
+rest_command:
+  prtg:
+    url: https://{your_prtg_instance}:5051/{your_access_token}
+    method: POST
+    headers:
+      accept: 'application/json, text/html'
+    payload: '{"prtg":{"result":[{"channel":"Mailbox","value":"{{ status }}"}]}}'
+    content_type:  'application/json; charset=utf-8'

@@ -1,0 +1,45 @@
+- alias: Push Value to PRTG
+  trigger:
+  - entity_id: sensor.office_pressure
+    platform: state
+    to: 'on'
+  action:
+    service: rest_command.prtg
+    data_template:
+      sensor_name: "Office Pressure"
+      value: '{{ states.sensor.office_pressure.state | int }}'
+
+- alias: Push Value to PRTG
+  trigger:
+  - entity_id: sensor.office_voltage
+    platform: state
+    to: 'on'
+  action:
+    service: rest_command.prtg
+    data_template:
+      sensor_name: "Office Voltage"
+      value: '{{ states.sensor.office_voltage.state | int }}'
+
+- alias: Push Value to PRTG
+  trigger:
+  - entity_id: sensor.office_humidity
+    platform: state
+    to: 'on'
+  action:
+    service: rest_command.prtg
+    data_template:
+      sensor_name: "Office Humidity"
+      value: '{{ states.sensor.office_humidity.state | int }}'
+
+- alias: Push Value to PRTG
+  trigger:
+  - entity_id: sensor.office_temperature
+    platform: state
+    to: 'on'
+  action:
+    service: rest_command.prtg
+    data_template:
+      sensor_name: "Office Temperature"
+      value: '{{ states.sensor.office_temperature.state | int }}'
+
+

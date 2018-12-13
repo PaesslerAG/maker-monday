@@ -10,3 +10,6 @@ Youtube: https://www.youtube.com/playlist?list=PLlzpc0FQ9agg4q1gejCJbGzNMY43F2TV
 - Episode 2: 433 Mhz Sockets
 - Episode 3: Wakeup Light
 - Episode 4: Temperature Logger
+- Episode 7: Smart Maibox
+- Episode 9: Multi Way Switch
+- Episode 11: Connect Homeassistant with PRTG
