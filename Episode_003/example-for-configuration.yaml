@@ -1,5 +1,6 @@
 light wakeup:
-  - platform: mqtt_json
+  - platform: mqtt
+    schema: json
     name: "WakeupLight"
     state_topic: "ledstrip/wakeup"
     command_topic: "ledstrip/wakeup/set"
