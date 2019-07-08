@@ -15,3 +15,4 @@ Youtube: https://www.youtube.com/playlist?list=PLlzpc0FQ9agg4q1gejCJbGzNMY43F2TV
 - Episode 11: Connect Homeassistant with PRTG
 - Episode 12: Particulate Mater Monitoring
 - Episode 17: Face Recognition
+- Episode 19: Smart Door Buzzer
