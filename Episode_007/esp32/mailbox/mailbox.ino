@@ -10,50 +10,62 @@ const char* mqttServer = "mqtt_server_ip_goes_here";
 const int mqttPort = 1883;
 const char* mqttUser = "homeassistants_mqtt_username_goes_here";
 const char* mqttPassword = "homeassistans_mqtt_password_goes_here";
+int var;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+// use static ip to avoid DHCP wait time
+IPAddress ip(192, 168, 254, 1);
+IPAddress gateway(192, 168, 0, 1);
+IPAddress subnet (255, 255, 255, 0);
 
 void setup(){
   Serial.begin(115200);
   delay(100); //Take some time to open up the Serial Monitor
 
-  //Setup WiFi
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
   //get wakeup bit
   uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();
   //if it didnt woke because of flap or door, we dont need to do anything.
   if(esp_sleep_get_wakeup_cause() == 2){// 2 is RTC_CTRL - the IOs controlled by rtc
-          WiFi.begin(ssid, password);
+  				//Setup WiFi
+  				Serial.print("Connecting to ");
+  				Serial.print(ssid);
+
+          WiFi.config(ip, gateway, subnet);
+					WiFi.begin(ssid, password);
         
-          while (WiFi.status() != WL_CONNECTED) {
+          var = 0;
+					while (WiFi.status() != WL_CONNECTED && var <= 25) {
               delay(1000);
               Serial.print(".");
+						  var++;
           }
-        
-          Serial.println("WiFi connected");
+          Serial.println();
+
+					if (WiFi.status() != WL_CONNECTED) {
+    		  		Serial.println("Unable to connect to WiFi, going back to sleep");
+      				esp_deep_sleep_start();
+    			}
+		
+					Serial.println("WiFi connected");
           Serial.println("IP address: ");
           Serial.println(WiFi.localIP());
         
-          client.setServer(mqttServer, mqttPort);
+          Serial.println("Connecting to MQTT...");
+					client.setServer(mqttServer, mqttPort);
          
-          while (!client.connected()) {
-            Serial.println("Connecting to MQTT...");
-         
-            if (client.connect("paesslersMailbox", mqttUser, mqttPassword )) {  
-              Serial.println("mqtt connected");
-         
-            } else {
-         
-              Serial.print("failed with state ");
-              Serial.print(client.state());
+		 			var = 0;
+          while (!client.connected() && var < 3) {
+						if (client.connect("paesslersMailbox", mqttUser, mqttPassword )) {  
+							Serial.println("MQTT connected");
+         		} else {
+         			Serial.print("Failed with state ");
+              Serial.println(client.state());
               delay(2000);
-         
             }
-          }
-         
+						var++;
+					}
+        
           if (wakeupBit & GPIO_SEL_25) {
             // GPIO 25 woke up
             Serial.println("a letter arrived");
@@ -64,7 +76,8 @@ void setup(){
             Serial.println("emptied mailbox");
             client.publish("mailbox/action", "emptied");
           }
-
+					// disconnect WiFi
+					WiFi.disconnect();
   }
 
   //we need the internal pullups/downs to work so wee need an option to keep the power for them on during sleep.
@@ -89,8 +102,8 @@ void setup(){
   }
   else{
     //arm both flap and door.
-    Serial.println("arming door and flap");
-    esp_sleep_enable_ext1_wakeup(GPIO_SEL_25 | GPIO_SEL_26,ESP_EXT1_WAKEUP_ANY_HIGH);
+    Serial.println("arming flap");
+    esp_sleep_enable_ext1_wakeup(GPIO_SEL_25,ESP_EXT1_WAKEUP_ANY_HIGH);
   }
   //Go to sleep now
   Serial.println("Going to sleep now");
