@@ -53,7 +53,7 @@ void setup()
             wakePort = 26;
           }
         }
-        if (WakePort != 0) Serial.println ("Wakeup triggered by port: " + String(wakePort));
+        if (wakePort != 0) Serial.println ("Wakeup triggered by port: " + String(wakePort));
     }
 
     if (wakePort == 25 || wakePort == 26) {
