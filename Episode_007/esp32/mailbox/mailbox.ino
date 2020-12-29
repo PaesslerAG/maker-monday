@@ -2,116 +2,160 @@
 #include <PubSubClient.h>
 #include <Wire.h>
 
+// WiFi configuration
+const char* ssid = "your_ssid_here"; // WiFi SSID
+const char* password = "your_wifi_password_here"; // WiFi password
 
-// Replace the next variables with your SSID/Password combination
-const char* ssid = "your_wlan_name_goes_here";
-const char* password = "wlan_password_goes_here";
-const char* mqttServer = "mqtt_server_ip_goes_here";
-const int mqttPort = 1883;
-const char* mqttUser = "homeassistants_mqtt_username_goes_here";
-const char* mqttPassword = "homeassistans_mqtt_password_goes_here";
-int var;
-WiFiClient espClient;
-PubSubClient client(espClient);
+// Using a static IP address to avoid using DHCP will save battery
+const bool useDHCP = false; // use DHCP (true/false)
+IPAddress ip(192, 168, 0, 100); // WiFi Client IP when useDHCP == false
+IPAddress gateway(192, 168, 0, 1); // Statis client gateway when useDHCP == false
+IPAddress subnet(255, 255, 255, 0); // Static client subnet when useDHCP == false
 
-// use static ip to avoid DHCP wait time
-IPAddress ip(192, 168, 254, 1);
-IPAddress gateway(192, 168, 0, 1);
-IPAddress subnet (255, 255, 255, 0);
+// MQTT configuration
+const char* mqttServer = "192.168.0.50"; // MQTT broker IP
+const char* mqttUser = "your_mqtt_username"; // MQTT username
+const char* mqttPassword = "your_mqtt_password"; // MQTT password
+const int mqttPort = 1883; // MQTT port (default: 1883)
 
-void setup(){
-  Serial.begin(115200);
-  delay(100); //Take some time to open up the Serial Monitor
+// Retry configuration
+const int retryWaitTime = 30; // Retry wait time in minutes
+const int retryMaxTimes = 5; // Maximum retry times
 
-  //get wakeup bit
-  uint64_t wakeupBit = esp_sleep_get_ext1_wakeup_status();
-  //if it didnt woke because of flap or door, we dont need to do anything.
-  if(esp_sleep_get_wakeup_cause() == 2){// 2 is RTC_CTRL - the IOs controlled by rtc
-  				//Setup WiFi
-  				Serial.print("Connecting to ");
-  				Serial.print(ssid);
+int wakePort;
+RTC_DATA_ATTR int retryCount = 0;
+RTC_DATA_ATTR int retryPort = 0;
 
-          WiFi.config(ip, gateway, subnet);
-					WiFi.begin(ssid, password);
-        
-          var = 0;
-					while (WiFi.status() != WL_CONNECTED && var <= 25) {
-              delay(1000);
-              Serial.print(".");
-						  var++;
+void setup()
+{
+    Serial.begin(115200);
+    Serial.println("Starting up...");
+    Serial.println();
+    
+    int wakeupStatus = esp_sleep_get_ext1_wakeup_status();
+
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+
+    Serial.println("wakeupStatus: " + String(wakeupStatus));
+    Serial.println("retryPort: " + String(retryPort));
+    Serial.println("retryCount: " + String(retryCount));
+
+    if (wakeupStatus == 0 && retryPort != 0) {
+        wakePort = retryPort;
+        Serial.println ("Retry previously triggered wakePort: " + String(wakePort));
+    } else {
+        if (wakeupStatus != 0) {
+          wakePort = log(wakeupStatus)/log(2);
+        } else {
+          if (digitalRead(25)) {
+            wakePort = 25;
+          } else if (digitalRead(26)) {
+            wakePort = 26;
           }
-          Serial.println();
+        }
+        if (wakePort != 0) Serial.println ("Wakeup triggered by port: " + String(wakePort));
+    }
 
-					if (WiFi.status() != WL_CONNECTED) {
-    		  		Serial.println("Unable to connect to WiFi, going back to sleep");
-      				esp_deep_sleep_start();
-    			}
-		
-					Serial.println("WiFi connected");
-          Serial.println("IP address: ");
-          Serial.println(WiFi.localIP());
-        
-          Serial.println("Connecting to MQTT...");
-					client.setServer(mqttServer, mqttPort);
-         
-		 			var = 0;
-          while (!client.connected() && var < 3) {
-						if (client.connect("paesslersMailbox", mqttUser, mqttPassword )) {  
-							Serial.println("MQTT connected");
-         		} else {
-         			Serial.print("Failed with state ");
-              Serial.println(client.state());
-              delay(2000);
+    if (wakePort == 25 || wakePort == 26) {
+        retryPort = wakePort;
+        Serial.print("Connecting to " + String(ssid));
+
+        // Setup WiFi
+        WiFiClient espClient;
+        if (!useDHCP) WiFi.config(ip, gateway, subnet);
+        WiFi.begin(ssid, password);
+ 
+        int trycount = 0;
+        // try to connect to WiFi for another 15 seconds
+        while (WiFi.status() != WL_CONNECTED && trycount <= 15) {
+            delay(500);
+            Serial.print(".");
+            trycount++;
+        }
+        Serial.println();
+
+        if (WiFi.status() == WL_CONNECTED) {
+            Serial.println("WiFi connected");
+            Serial.print("IP address: ");
+            Serial.println(WiFi.localIP());
+
+            Serial.println("Connecting to MQTT...");
+            PubSubClient client(espClient);
+            client.setServer(mqttServer, mqttPort);
+
+            if (client.connect("Mailbox", mqttUser, mqttPassword)) {
+                if (wakePort == 25) {
+                    for (int i = 0; i < 3; i++) {
+                      client.publish("mailbox/action", "arrived");
+                      delay(100);
+                    }
+                    Serial.println("A letter arrived, arming door");
+                    esp_sleep_enable_ext1_wakeup(GPIO_SEL_26, ESP_EXT1_WAKEUP_ANY_HIGH);
+                    gpio_pulldown_en(GPIO_NUM_26);
+                } else {
+                    for (int i = 0; i < 3; i++) {
+                      client.publish("mailbox/action", "emptied");
+                      delay(100);
+                    }
+                    Serial.println("Mailbox emptied, arming flap");
+                    esp_sleep_enable_ext1_wakeup(GPIO_SEL_25, ESP_EXT1_WAKEUP_ANY_HIGH);
+                    gpio_pulldown_en(GPIO_NUM_25);
+                }
+                resetRetry();
             }
-						var++;
-					}
-        
-          if (wakeupBit & GPIO_SEL_25) {
-            // GPIO 25 woke up
-            Serial.println("a letter arrived");
-            client.publish("mailbox/action", "arrived");
-          } 
-          else{
-            // must be GPIO 26 - we can't as explicitly because with unarmed flap this doesnt work.
-            Serial.println("emptied mailbox");
-            client.publish("mailbox/action", "emptied");
-          }
-					// disconnect WiFi
-					WiFi.disconnect();
-  }
+            else {
+                Serial.println("Unable to connect to MQTT server");
+                retry();
+            }
 
-  //we need the internal pullups/downs to work so wee need an option to keep the power for them on during sleep.
-  //note: when you use external pulldowns (10K) instead of the internal ones you can save around 10µA in deepsleep  (then comment out the next 5 lines)
-  //note2: don't use gpio34-39 when using internal pullup/downs - they don't have them.
-  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
-  gpio_pullup_dis(GPIO_NUM_25);
-  gpio_pulldown_en(GPIO_NUM_25);
-  gpio_pullup_dis(GPIO_NUM_26);
-  gpio_pulldown_en(GPIO_NUM_26);
+            // disconnect from MQTT
+            client.disconnect();
+        }
+        else {
+            Serial.println("Unable to connect to WiFi network");
+            retry();
+        }
 
-  /*
-   * Important: Assume someone threw a magazine into our Mailbox, blocking the flap. This would cause it to
-   * permanently wake up and drain our battery. So we'll only arm the mailbox door switch after a letter
-   * arrived.
-   */
-  
-  if(wakeupBit & GPIO_SEL_25){
-  //enable gpio 25 and 26 for deep sleep (using bit or) - wakeup if any of those go high.
-    Serial.println("only arming door");
-    esp_sleep_enable_ext1_wakeup(GPIO_SEL_26,ESP_EXT1_WAKEUP_ANY_HIGH);
-  }
-  else{
-    //arm both flap and door.
-    Serial.println("arming flap");
-    esp_sleep_enable_ext1_wakeup(GPIO_SEL_25,ESP_EXT1_WAKEUP_ANY_HIGH);
-  }
-  //Go to sleep now
-  Serial.println("Going to sleep now");
-  esp_deep_sleep_start();
-  Serial.println("This will never be printed");
+        // disconnect WiFi
+        WiFi.disconnect();
+    } else {
+        gpio_pulldown_en(GPIO_NUM_25);
+        gpio_pulldown_en(GPIO_NUM_26);
+        esp_sleep_enable_ext1_wakeup(GPIO_SEL_25 | GPIO_SEL_26, ESP_EXT1_WAKEUP_ANY_HIGH);
+    }
+
+    // Go to deep sleep
+    Serial.println("Going to sleep now...");
+
+    esp_deep_sleep_start();
+    Serial.println("This will never be printed");
 }
 
+void retry()
+{
+    if (retryCount < retryMaxTimes) {
+        Serial.println("An error has occurred, let's try again later");
+        ++retryCount;
+        esp_sleep_enable_timer_wakeup(retryWaitTime * 60000000);
+        gpio_pulldown_en(GPIO_NUM_25);
+        gpio_pulldown_en(GPIO_NUM_26);
+        esp_sleep_enable_ext1_wakeup(GPIO_SEL_25 | GPIO_SEL_26, ESP_EXT1_WAKEUP_ANY_HIGH);
+    }
+    else {
+        Serial.println("Retry failed again. I give up, sorry.");
+        resetRetry();
+    }
+}
 
-void loop(){
-  //This is not going to be called
+void resetRetry()
+{
+    Serial.println("Resetting retry data");
+    // reset any retry counts and states
+    retryCount = 0;
+    retryPort = 0;
+}
+
+void loop()
+{
+    // This is not going to be called
 }
